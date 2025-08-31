@@ -86,12 +86,23 @@ module.exports = {
     MESSAGES: {
         WELCOME: `🎉 Welcome to CryptoTip Bot!
 
-Your crypto wallet has been created. You can now:
-• Send tips to friends with /tip
-• Check your balance with /balance  
-• Get your deposit address with /deposit
+Your multi-chain crypto wallet has been created! 🚀
 
-Type /help for all commands.`,
+🌐 **Supported Networks:**
+✅ Base Sepolia (Default)
+⚪ Polygon Mumbai  
+⚪ Arbitrum Goerli
+
+💰 **Available Tokens:**
+• USDC, USDT, ETH/MATIC on all networks
+
+🔧 **Quick Commands:**
+• /balance - Check all balances
+• /deposit - Get wallet address
+• /network - Switch networks
+• /tip @user 5 USDC - Send tips
+
+Type /help for detailed commands.`,
         
         HELP: `💡 CryptoTip Bot Commands:
 

@@ -12,7 +12,19 @@ async function handleStart(bot, msg) {
         const existingUser = await User.findByTelegramId(telegramId);
         
         if (existingUser) {
-            const message = `👋 Welcome back, @${username}!\n\nYour wallet is ready. Use /help for commands.`;
+            const networkList = Object.entries(NETWORKS)
+                .map(([key, network]) => `• ${network.NAME} (${key})`)
+                .join('\n');
+            
+            const message = `👋 Welcome back, @${username}!
+
+🌐 **Multi-Chain Wallet Ready:**
+${networkList}
+
+💰 **Supported Tokens:** USDC, USDT, ETH/MATIC
+🔄 **Current Network:** ${existingUser.preferred_network || 'BASE'}
+
+🚀 Use /network to switch networks\n📊 Use /balance to check all balances\n❓ Use /help for all commands`;
             return bot.sendMessage(msg.chat.id, message);
         }
         
@@ -47,6 +59,19 @@ async function handleStart(bot, msg) {
         
         const depositMessage = MessageFormatter.formatDepositInfo(newWallet.address);
         await bot.sendMessage(msg.chat.id, depositMessage, { parse_mode: 'Markdown' });
+        
+        // Show network switching info
+        const networkInfo = `🌍 **Network Commands:**
+
+• \`/network\` - View & switch networks
+• \`/network POLYGON\` - Switch to Polygon
+• \`/network ARBITRUM\` - Switch to Arbitrum
+• \`/balance POLYGON\` - Check Polygon balance
+• \`/deposit ARBITRUM\` - Get Arbitrum address
+
+🚀 Start with Base Sepolia, switch anytime!`;
+        
+        await bot.sendMessage(msg.chat.id, networkInfo, { parse_mode: 'Markdown' });
         
         // New user wallet created successfully
         

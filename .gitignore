@@ -32,7 +32,7 @@ pids/
 dist/
 build/
 coverage/
-
+error.md
 # WhatsApp session data
 .wwebjs_auth/
 .wwebjs_cache/
