@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoTip Bot - User QR Codes</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .container {
+            background: white;
+            color: #333;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .qr-section {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .qr-code {
+            margin: 20px 0;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        .link-box {
+            background: #e3f2fd;
+            border: 1px solid #90caf9;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            word-break: break-all;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 CryptoTip Bot - User Access QR Codes</h1>
+        
+        <div class="section">
+            <h2>📱 Generate WhatsApp QR Codes for Users</h2>
+            <p>Create QR codes that users can scan to start chatting with your bot on WhatsApp.</p>
+            
+            <label>Your WhatsApp Number (with country code):</label>
+            <input type="tel" id="phoneNumber" placeholder="e.g. +1234567890" />
+            
+            <label>Default Message (optional):</label>
+            <input type="text" id="defaultMessage" placeholder="e.g. start" value="start" />
+            
+            <button onclick="generateQRCodes()">Generate QR Codes</button>
+        </div>
+        
+        <div id="qrResults" style="display: none;">
+            <div class="qr-section">
+                <h3>🔗 WhatsApp Link</h3>
+                <div class="link-box" id="whatsappLink"></div>
+                <button onclick="copyLink()">Copy Link</button>
+            </div>
+            
+            <div class="qr-section">
+                <h3>📱 QR Code for Users</h3>
+                <p>Users scan this to start chatting with your bot:</p>
+                <div class="qr-code" id="qrCodeContainer"></div>
+                <button onclick="downloadQR()">Download QR Code</button>
+            </div>
+            
+            <div class="qr-section">
+                <h3>🎯 How to Use</h3>
+                <ol style="text-align: left;">
+                    <li><strong>Share the link</strong> or QR code with users</li>
+                    <li><strong>Users click/scan</strong> to open WhatsApp</li>
+                    <li><strong>Users send "start"</strong> to begin using the bot</li>
+                    <li><strong>Users can then use commands</strong> like help, balance, tip, etc.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let generatedQR = null;
+        
+        function generateQRCodes() {
+            const phone = document.getElementById('phoneNumber').value.trim();
+            const message = document.getElementById('defaultMessage').value.trim() || 'start';
+            
+            if (!phone) {
+                alert('Please enter your WhatsApp number');
+                return;
+            }
+            
+            // Clean phone number
+            const cleanPhone = phone.replace(/[^\d+]/g, '');
+            
+            // Generate WhatsApp link
+            const whatsappLink = `https://wa.me/${cleanPhone.replace('+', '')}?text=${encodeURIComponent(message)}`;
+            
+            // Display link
+            document.getElementById('whatsappLink').textContent = whatsappLink;
+            
+            // Generate QR code
+            const qrContainer = document.getElementById('qrCodeContainer');
+            qrContainer.innerHTML = '';
+            
+            QRCode.toCanvas(qrContainer, whatsappLink, {
+                width: 256,
+                margin: 2,
+                color: {
+                    dark: '#000000',
+                    light: '#FFFFFF'
+                }
+            }, function (error, canvas) {
+                if (error) {
+                    console.error('QR Code generation error:', error);
+                    alert('Failed to generate QR code');
+                    return;
+                }
+                
+                generatedQR = canvas;
+                document.getElementById('qrResults').style.display = 'block';
+            });
+        }
+        
+        function copyLink() {
+            const link = document.getElementById('whatsappLink').textContent;
+            navigator.clipboard.writeText(link).then(() => {
+                alert('Link copied to clipboard!');
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = link;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('Link copied to clipboard!');
+            });
+        }
+        
+        function downloadQR() {
+            if (!generatedQR) return;
+            
+            const link = document.createElement('a');
+            link.download = 'cryptotip-bot-qr.png';
+            link.href = generatedQR.toDataURL();
+            link.click();
+        }
+        
+        // Auto-fill example
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('phoneNumber').value = '+1234567890'; // Example
+        });
+    </script>
+</body>
+</html>

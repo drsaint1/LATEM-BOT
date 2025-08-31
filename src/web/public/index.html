@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoTip Bot - Analytics Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+        
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .chart-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .chart-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .network-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .network-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .network-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .network-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .base { background: #0052ff; }
+        .polygon { background: #8247e5; }
+        .arbitrum { background: #28a0f0; }
+        
+        .network-name {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+        
+        .network-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .network-stat {
+            text-align: center;
+        }
+        
+        .network-stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .network-stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .user-search {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        
+        .search-input {
+            width: 100%;
+            max-width: 400px;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 50px;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .search-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .search-button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .footer {
+            text-align: center;
+            color: white;
+            opacity: 0.7;
+            margin-top: 40px;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 CryptoTip Analytics</h1>
+            <p>Multi-chain tipping bot dashboard</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-value" id="totalUsers">-</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">💸</div>
+                <div class="stat-value" id="totalTransactions">-</div>
+                <div class="stat-label">Transactions</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">💰</div>
+                <div class="stat-value" id="totalVolume">-</div>
+                <div class="stat-label">Total Volume</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">🌐</div>
+                <div class="stat-value">3</div>
+                <div class="stat-label">Networks</div>
+            </div>
+        </div>
+        
+        <div class="charts-section">
+            <div class="chart-card">
+                <div class="chart-title">Network Distribution</div>
+                <canvas id="networkChart"></canvas>
+            </div>
+            
+            <div class="chart-card">
+                <div class="chart-title">Token Usage</div>
+                <canvas id="tokenChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="network-grid" id="networkGrid">
+            <!-- Network cards will be populated by JavaScript -->
+        </div>
+        
+        <div class="user-search">
+            <h3 style="margin-bottom: 20px;">🔍 User Dashboard</h3>
+            <input type="text" id="telegramId" class="search-input" placeholder="Enter Telegram ID or @username">
+            <br>
+            <button onclick="searchUser()" class="search-button">View Dashboard</button>
+        </div>
+        
+        <div class="footer">
+            <p>Built for Aleph Hackathon 2025 | Multi-chain tipping on Base, Polygon & Arbitrum</p>
+        </div>
+    </div>
+
+    <script>
+        let networkStats = {};
+        
+        async function loadDashboardData() {
+            try {
+                const response = await fetch('/api/network/stats');
+                const data = await response.json();
+                
+                // Update main stats
+                document.getElementById('totalUsers').textContent = data.totalUsers.toLocaleString();
+                document.getElementById('totalTransactions').textContent = data.totalTransactions.toLocaleString();
+                document.getElementById('totalVolume').textContent = '$' + data.totalVolume.toLocaleString();
+                
+                networkStats = data.networkBreakdown;
+                
+                // Create charts
+                createNetworkChart(data.networkBreakdown);
+                createTokenChart(data.networkBreakdown);
+                
+                // Create network cards
+                createNetworkCards(data.networkBreakdown);
+                
+            } catch (error) {
+                console.error('Failed to load dashboard data:', error);
+            }
+        }
+        
+        function createNetworkChart(networkData) {
+            const ctx = document.getElementById('networkChart').getContext('2d');
+            
+            const labels = Object.keys(networkData);
+            const data = labels.map(network => networkData[network].transactionCount || 0);
+            
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: ['#0052ff', '#8247e5', '#28a0f0'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+        
+        function createTokenChart(networkData) {
+            const ctx = document.getElementById('tokenChart').getContext('2d');
+            
+            const tokens = {};
+            Object.values(networkData).forEach(network => {
+                if (network.tokenBreakdown) {
+                    Object.entries(network.tokenBreakdown).forEach(([token, count]) => {
+                        tokens[token] = (tokens[token] || 0) + count;
+                    });
+                }
+            });
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(tokens),
+                    datasets: [{
+                        label: 'Transactions',
+                        data: Object.values(tokens),
+                        backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+        
+        function createNetworkCards(networkData) {
+            const networkGrid = document.getElementById('networkGrid');
+            networkGrid.innerHTML = '';
+            
+            const networkInfo = {
+                'BASE': { name: 'Base', icon: 'B', class: 'base' },
+                'POLYGON': { name: 'Polygon', icon: 'P', class: 'polygon' },
+                'ARBITRUM': { name: 'Arbitrum', icon: 'A', class: 'arbitrum' }
+            };
+            
+            Object.entries(networkData).forEach(([network, stats]) => {
+                const info = networkInfo[network];
+                if (!info) return;
+                
+                const card = document.createElement('div');
+                card.className = 'network-card';
+                card.innerHTML = `
+                    <div class="network-header">
+                        <div class="network-icon ${info.class}">${info.icon}</div>
+                        <div class="network-name">${info.name}</div>
+                    </div>
+                    <div class="network-stats">
+                        <div class="network-stat">
+                            <div class="network-stat-value">${(stats.transactionCount || 0).toLocaleString()}</div>
+                            <div class="network-stat-label">Transactions</div>
+                        </div>
+                        <div class="network-stat">
+                            <div class="network-stat-value">$${(stats.volume || 0).toLocaleString()}</div>
+                            <div class="network-stat-label">Volume</div>
+                        </div>
+                        <div class="network-stat">
+                            <div class="network-stat-value">${(stats.uniqueUsers || 0).toLocaleString()}</div>
+                            <div class="network-stat-label">Users</div>
+                        </div>
+                        <div class="network-stat">
+                            <div class="network-stat-value">${(stats.avgTransaction || 0).toFixed(2)}</div>
+                            <div class="network-stat-label">Avg Tip</div>
+                        </div>
+                    </div>
+                `;
+                networkGrid.appendChild(card);
+            });
+        }
+        
+        function searchUser() {
+            const input = document.getElementById('telegramId').value.trim();
+            if (!input) {
+                alert('Please enter a Telegram ID or username');
+                return;
+            }
+            
+            // Remove @ if present
+            const telegramId = input.replace('@', '');
+            window.open(`/user/${telegramId}`, '_blank');
+        }
+        
+        // Handle Enter key in search input
+        document.getElementById('telegramId').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchUser();
+            }
+        });
+        
+        // Load data when page loads
+        loadDashboardData();
+        
+        // Refresh data every 30 seconds
+        setInterval(loadDashboardData, 30000);
+    </script>
+</body>
+</html>

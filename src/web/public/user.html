@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoTip Bot - User Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .user-info {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .user-details h2 {
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+        
+        .user-meta {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .wallet-address {
+            font-family: monospace;
+            background: #f5f5f5;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.8em;
+        }
+        
+        .network-selector {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        
+        .balances-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .balance-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .network-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .network-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 0.9em;
+        }
+        
+        .base { background: #0052ff; }
+        .polygon { background: #8247e5; }
+        .arbitrum { background: #28a0f0; }
+        
+        .token-balance {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .token-balance:last-child {
+            border-bottom: none;
+        }
+        
+        .token-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .token-symbol {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .balance-amount {
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #666;
+        }
+        
+        .transactions-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        .transaction-item {
+            display: grid;
+            grid-template-columns: auto 1fr auto auto;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+        
+        .tx-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+        }
+        
+        .tx-sent {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .tx-received {
+            background: #d1fae5;
+            color: #059669;
+        }
+        
+        .tx-details {
+            flex: 1;
+        }
+        
+        .tx-type {
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+        
+        .tx-meta {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .tx-amount {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .tx-time {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+        }
+        
+        .error {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .user-info {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            
+            .transaction-item {
+                grid-template-columns: auto 1fr;
+                gap: 10px;
+            }
+            
+            .tx-amount, .tx-time {
+                grid-column: 2;
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="loading" class="loading">
+            <h2>Loading user dashboard...</h2>
+        </div>
+        
+        <div id="error" class="error" style="display: none;">
+            <h3>User not found</h3>
+            <p>The requested user doesn't exist or hasn't started the bot yet.</p>
+        </div>
+        
+        <div id="dashboard" style="display: none;">
+            <div class="header">
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar"></div>
+                    <div class="user-details">
+                        <h2 id="username"></h2>
+                        <div class="user-meta">
+                            <div>Telegram ID: <span id="telegramId"></span></div>
+                            <div class="wallet-address" id="walletAddress"></div>
+                            <div>Member since: <span id="memberSince"></span></div>
+                        </div>
+                    </div>
+                    <select class="network-selector" id="networkSelector">
+                        <option value="BASE">Base Network</option>
+                        <option value="POLYGON">Polygon</option>
+                        <option value="ARBITRUM">Arbitrum</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="balances-section" id="balancesSection">
+                <!-- Balance cards will be populated by JavaScript -->
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalSent">-</div>
+                    <div class="stat-label">Total Sent</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalReceived">-</div>
+                    <div class="stat-label">Total Received</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="transactionCount">-</div>
+                    <div class="stat-label">Transactions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="uniqueContacts">-</div>
+                    <div class="stat-label">Unique Contacts</div>
+                </div>
+            </div>
+            
+            <div class="transactions-section">
+                <div class="section-title">Recent Transactions</div>
+                <div id="transactionsList">
+                    <!-- Transactions will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const telegramId = window.location.pathname.split('/').pop();
+        let userData = null;
+        
+        async function loadUserData() {
+            try {
+                const response = await fetch(`/api/user/${telegramId}`);
+                
+                if (!response.ok) {
+                    throw new Error('User not found');
+                }
+                
+                userData = await response.json();
+                displayUserData();
+                
+            } catch (error) {
+                console.error('Failed to load user data:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+            }
+        }
+        
+        function displayUserData() {
+            const { user, balances, transactions, stats } = userData;
+            
+            // Update user info
+            document.getElementById('userAvatar').textContent = user.username ? user.username[0].toUpperCase() : 'U';
+            document.getElementById('username').textContent = user.username ? `@${user.username}` : 'Anonymous User';
+            document.getElementById('telegramId').textContent = user.telegramId;
+            document.getElementById('walletAddress').textContent = user.walletAddress;
+            document.getElementById('memberSince').textContent = new Date(user.createdAt).toLocaleDateString();
+            
+            // Set preferred network
+            document.getElementById('networkSelector').value = user.preferredNetwork;
+            
+            // Display balances
+            displayBalances(balances);
+            
+            // Display stats
+            document.getElementById('totalSent').textContent = `$${stats.totalSent || 0}`;
+            document.getElementById('totalReceived').textContent = `$${stats.totalReceived || 0}`;
+            document.getElementById('transactionCount').textContent = stats.transactionCount || 0;
+            document.getElementById('uniqueContacts').textContent = stats.uniqueContacts || 0;
+            
+            // Display transactions
+            displayTransactions(transactions);
+            
+            // Show dashboard
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+        }
+        
+        function displayBalances(balances) {
+            const balancesSection = document.getElementById('balancesSection');
+            balancesSection.innerHTML = '';
+            
+            const networkInfo = {
+                'BASE': { name: 'Base', icon: 'B', class: 'base' },
+                'POLYGON': { name: 'Polygon', icon: 'P', class: 'polygon' },
+                'ARBITRUM': { name: 'Arbitrum', icon: 'A', class: 'arbitrum' }
+            };
+            
+            Object.entries(balances).forEach(([network, tokens]) => {
+                const info = networkInfo[network];
+                if (!info) return;
+                
+                const card = document.createElement('div');
+                card.className = 'balance-card';
+                
+                let tokensHtml = '';
+                Object.entries(tokens).forEach(([symbol, balance]) => {
+                    const balanceNum = parseFloat(balance);
+                    if (balanceNum > 0 || symbol === 'USDC') { // Always show USDC
+                        tokensHtml += `
+                            <div class="token-balance">
+                                <div class="token-info">
+                                    <div class="token-symbol">${symbol}</div>
+                                </div>
+                                <div class="balance-amount">${balanceNum.toFixed(6)}</div>
+                            </div>
+                        `;
+                    }
+                });
+                
+                card.innerHTML = `
+                    <div class="network-header">
+                        <div class="network-icon ${info.class}">${info.icon}</div>
+                        <div style="font-weight: bold;">${info.name}</div>
+                    </div>
+                    ${tokensHtml || '<div style="text-align: center; color: #666;">No balances</div>'}
+                `;
+                
+                balancesSection.appendChild(card);
+            });
+        }
+        
+        function displayTransactions(transactions) {
+            const transactionsList = document.getElementById('transactionsList');
+            
+            if (!transactions || transactions.length === 0) {
+                transactionsList.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">No transactions yet</div>';
+                return;
+            }
+            
+            transactionsList.innerHTML = '';
+            
+            transactions.forEach(tx => {
+                const isSent = tx.sender_id == telegramId;
+                const txItem = document.createElement('div');
+                txItem.className = 'transaction-item';
+                
+                txItem.innerHTML = `
+                    <div class="tx-icon ${isSent ? 'tx-sent' : 'tx-received'}">
+                        ${isSent ? '↗' : '↙'}
+                    </div>
+                    <div class="tx-details">
+                        <div class="tx-type">${isSent ? 'Sent' : 'Received'}</div>
+                        <div class="tx-meta">
+                            ${tx.network} • ${tx.message || 'No message'}
+                        </div>
+                    </div>
+                    <div class="tx-amount ${isSent ? 'tx-sent' : 'tx-received'}">
+                        ${isSent ? '-' : '+'}${tx.amount} ${tx.token}
+                    </div>
+                    <div class="tx-time">
+                        ${new Date(tx.created_at).toLocaleDateString()}
+                    </div>
+                `;
+                
+                transactionsList.appendChild(txItem);
+            });
+        }
+        
+        // Load user data when page loads
+        loadUserData();
+        
+        // Handle network selector change
+        document.getElementById('networkSelector').addEventListener('change', function() {
+            // In a real implementation, this could update the preferred network
+            console.log('Network changed to:', this.value);
+        });
+    </script>
+</body>
+</html>
